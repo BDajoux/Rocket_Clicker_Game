@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)https://csharp.nouvet.fr/front10/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocket Clicker Game</title>
+    <link rel="stylesheet" href="./Rocket Clicker Game_files/style.css">
+    <!-- SignalR Library -->
+    <script src="./Rocket Clicker Game_files/signalr.js.téléchargé"></script><style type="text/css" id="operaUserStyle"></style>
+</head>
+<body>
+    <!-- Shop Panel -->
+    <div class="shop-panel" id="shopPanel">
+        <div class="shop-panel-header">
+            <h3>🛒 Shop</h3>
+            <button id="closeShopBtn" class="close-panel-btn">✕</button>
+        </div>
+        
+        <div class="shop-tabs">
+            <button id="shopTabBtn" class="shop-tab-btn active">🏪 Available Items</button>
+            <button id="inventoryTabBtn" class="shop-tab-btn">🎒 My Inventory</button>
+        </div>
+
+        <button id="seedShopBtn" class="seed-shop-btn">🌱 Seed Shop</button>
+        
+        <div id="shopContent" class="shop-content">
+            <div class="loading">Loading items...</div>
+        </div>
+
+        <div id="inventoryContent" class="shop-content" style="display: none;">
+            <div class="loading">Loading inventory...</div>
+        </div>
+    </div>
+
+    <!-- Users Panel -->
+    <div class="users-panel" id="usersPanel">
+        <div class="users-panel-header">
+            <h3>Users</h3>
+            <button id="closePanelBtn" class="close-panel-btn">✕</button>
+        </div>
+        <div class="search-container">
+            <input type="text" id="userSearchInput" placeholder="🔍 Search users..." class="user-search-input">
+            <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
+        </div>
+        <div class="filter-buttons">
+            <button id="refreshUsersBtn" class="filter-btn">🔄 All Users</button>
+            <button id="showAdminsBtn" class="filter-btn">👑 Admins</button>
+        </div>
+        <div class="users-list" id="usersList">
+            <div class="loading">Loading users...</div>
+        </div>
+    </div>
+
+    <!-- Toggle Buttons -->
+    <button id="toggleShopBtn" class="toggle-panel-btn" style="left: 20px; display: none;">🛒 Shop</button>
+    <button id="togglePanelBtn" class="toggle-panel-btn" style="left: 130px; display: none;">👥 Users</button>
+    <button id="toggleChatBtn" class="toggle-panel-btn" style="left: 260px; display: none;">💬 Chat</button>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel" id="chatPanel" style="display: none;">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button id="closeChatBtn" class="close-panel-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages seront ajoutés ici dynamiquement -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Envoyer un message...">
+            <button id="sendChatBtn">Envoyer</button>
+        </div>
+    </div>
+
+    <!-- Best Score Display -->
+    <div class="best-score-display" id="bestScoreDisplay" style="display: none;">
+        <div class="best-score-label">🏆 Best Score</div>
+        <div class="best-score-value" id="bestScoreValue">-</div>
+        <div class="best-score-player" id="bestScorePlayer">Loading...</div>
+    </div>
+
+    <div class="login-container" id="loginContainer">
+        <h2 id="formTitle">Login</h2>
+        <input type="text" id="username" placeholder="Username" autocomplete="username">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <button id="submitButton">Login</button>
+        <div id="loginMessage" class="login-message"></div>
+        <div class="toggle-mode">
+            <span id="toggleText">Don't have an account?</span>
+            <a href="https://csharp.nouvet.fr/front10/#" id="toggleLink">Register</a>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="user-info">
+            <span>Logged in as: <strong id="loggedUsername"></strong></span>
+            <button id="logoutButton" class="logout-button">Logout</button>
+        </div>
+
+        <div class="score-display">
+            <div id="score">0</div>
+            <div style="font-size: 1rem; opacity: 0.8; margin-top: 10px;">points</div>
+        </div>
+
+        <div class="button-container">
+            <button class="click-button" id="clickButton">
+                🎄<br>CLICK!
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Clicks</div>
+                <div class="stat-value" id="clickCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Multiplier</div>
+                <div class="stat-value" id="perClick">1</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Click Bonus</div>
+                <div class="stat-value" id="totalClickValue">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Best Score</div>
+                <div class="stat-value" id="bestScore" style="color: rgb(255, 152, 0); text-shadow: none;">0</div>
+            </div>
+        </div>
+
+        <div class="reset-section">
+            <button id="resetButton" class="reset-button">⚡ Reset (Cost: 100 clicks)</button>
+            <div class="reset-info">Reset to gain +1 multiplier! Cost increases exponentially.</div>
+        </div>
+    </div>
+
+    <div class="console-container">
+        <div class="console-header">
+            <span>Console</span>
+            <button id="clearConsole" class="clear-btn">Clear</button>
+        </div>
+        <div class="console-content" id="consoleContent">
+            <div class="console-message info">Console ready. Waiting for requests...</div>
+        </div>
+    </div>
+
+    <script src="./Rocket Clicker Game_files/script.js.téléchargé"></script>
+
+
+</body></html>
