@@ -8,3 +8,5 @@ lancez juste:
     ./start-all.sh si vous etes sur linux
 
 puis rendez-vous sur: localhost:8000/Rocket_Clicker_Game.html
+
+il faut auparavant avoir installé .NET 9.* et npm
