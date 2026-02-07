@@ -11,6 +11,13 @@ front_dir="$script_dir/front"
 backend_port=5000
 front_port=8000
 
+# If user-local dotnet was installed (~/.dotnet), make sure this script's PATH
+# and DOTNET_ROOT include it so non-interactive runs can find dotnet and dotnet tools.
+if [ -d "$HOME/.dotnet" ]; then
+  export DOTNET_ROOT="$HOME/.dotnet"
+  export PATH="$HOME/.dotnet:$HOME/.dotnet/tools:$PATH"
+fi
+
 log_dir="$script_dir/logs"
 mkdir -p "$log_dir"
 
@@ -19,6 +26,28 @@ pids=()
 start_backend() {
   if command -v dotnet >/dev/null 2>&1 && [ -d "$backend_proj_dir" ]; then
     echo "Applying EF migrations (dotnet ef database update) in $backend_proj_dir ..."
+
+    # Ensure dotnet-ef global tool is available for SDK 9 if needed
+    if ! command -v dotnet-ef >/dev/null 2>&1; then
+      echo "dotnet-ef not found in PATH. Attempting to install dotnet-ef global tool (channel 9)..."
+      if command -v dotnet >/dev/null 2>&1; then
+        # prefer specific channel 9 tool matching installed SDK
+        if ! dotnet tool install --global dotnet-ef --version 9.* >/dev/null 2>&1; then
+          echo "Failed to install dotnet-ef global tool. Please install it manually with:\n  dotnet tool install --global dotnet-ef --version 9.*" >&2
+          echo "Continuing but 'dotnet ef' may fail." >&2
+        else
+          echo "dotnet-ef installed to $HOME/.dotnet/tools"
+          export PATH="$HOME/.dotnet/tools:$PATH"
+        fi
+      fi
+    fi
+
+    # If there is no Migrations folder, create an initial migration first.
+    if [ ! -d "$backend_proj_dir/Migrations" ]; then
+      echo "Migrations folder not found. Creating initial migration 'Initial_migrations'..."
+      (cd "$backend_proj_dir" && dotnet ef migrations add "Initial_migrations" ) || echo "Could not create initial migration (it may already exist or dotnet-ef is missing)."
+    fi
+
     (cd "$backend_proj_dir" && dotnet ef database update) || { echo "dotnet ef failed. Fix migrations and retry." >&2; exit 1; }
 
     echo "Starting backend (GameServerApi) on http://localhost:$backend_port ..."
@@ -59,12 +88,15 @@ start_front() {
 }
 
 cleanup() {
+  # Disable EXIT trap to avoid recursive calls when we call exit from here.
+  trap - EXIT
   echo "Stopping processes..."
   for pid in "${pids[@]:-}"; do
     if [ -n "$pid" ]; then
       kill "$pid" >/dev/null 2>&1 || true
     fi
   done
+  # Exit with success after cleanup.
   exit 0
 }
 

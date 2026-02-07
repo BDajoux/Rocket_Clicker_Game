@@ -10,6 +10,19 @@ $frontPort = 8000
 if (Get-Command dotnet -ErrorAction SilentlyContinue -and (Test-Path $backendProjDir)) {
     Write-Host "Applying EF migrations (dotnet ef database update) in $backendProjDir ..." -ForegroundColor Cyan
     Push-Location $backendProjDir
+    # If there is no Migrations folder, try to add an initial migration first
+    $migrationsPath = Join-Path $backendProjDir "Migrations"
+    if (-not (Test-Path $migrationsPath)) {
+        Write-Host "Migrations folder not found. Creating initial migration 'Initial_migrations'..." -ForegroundColor Cyan
+        try {
+            dotnet ef migrations add "Initial_migrations"
+        }
+        catch {
+            Write-Host "Warning: could not create initial migration: $_" -ForegroundColor Yellow
+            # continue; database update may still work if migrations were applied elsewhere
+        }
+    }
+
     try {
         dotnet ef database update
     }
